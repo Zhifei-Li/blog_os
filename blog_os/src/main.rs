@@ -13,23 +13,23 @@ pub extern "C" fn _start() -> ! {
 
     blog_os::init();
 
+
+
     // as before
     #[cfg(test)]
     test_main();
 
     println!("It did not crash!");
-    loop {
-        use blog_os::print;
-        print!("-");  
-        for _ in 0..10000 {}    
-    }
+    
+    blog_os::hlt_loop()
 }
+
 /// This function is called on panic.
 #[cfg(not(test))]
 #[panic_handler]
 fn panic(info: &PanicInfo) -> ! {
     println!("{}", info);
-    loop {}
+    blog_os::hlt_loop();            // new
 }
 
 #[cfg(test)]
