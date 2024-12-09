@@ -13,12 +13,11 @@ pub extern "C" fn _start() -> ! {
 
     blog_os::init();
 
-    fn stack_overflow() {
-        stack_overflow(); // 每一次递归都会将返回地址入栈
-    }
+    // fn stack_overflow() {
+    //     stack_overflow(); 
+    // }
 
-    // 触发 stack overflow
-    stack_overflow();
+    // stack_overflow();
 
     // as before
     #[cfg(test)]
