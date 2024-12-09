@@ -1,18 +1,49 @@
 // in src/memory.rs
-use x86_64::structures::paging::OffsetPageTable;
 use x86_64::{
-    VirtAddr,
+    PhysAddr,VirtAddr,
+    structures::paging::{PageTable, Page, PhysFrame, Mapper, Size4KiB, FrameAllocator, OffsetPageTable}
 };
-use x86_64::{
-    PhysAddr,
-    structures::paging::{PageTable, Page, PhysFrame, Mapper, Size4KiB, FrameAllocator}
-};
+use bootloader::bootinfo::MemoryMap;
+use bootloader::bootinfo::MemoryRegionType;
 
 pub struct EmptyFrameAllocator;
-
+pub struct BootInfoFrameAllocator {
+    memory_map: &'static MemoryMap,
+    next: usize,
+}
 unsafe impl FrameAllocator<Size4KiB> for EmptyFrameAllocator {
     fn allocate_frame(&mut self) -> Option<PhysFrame> {
         None
+    }
+}
+
+impl BootInfoFrameAllocator {
+    pub unsafe fn init(memory_map: &'static MemoryMap) -> Self {
+        BootInfoFrameAllocator {
+            memory_map,
+            next: 0,
+        }
+    }
+    fn usable_frames(&self) -> impl Iterator<Item = PhysFrame> {
+        // 从内存 map 中获取可用的区域
+        let regions = self.memory_map.iter();
+        let usable_regions = regions
+            .filter(|r| r.region_type == MemoryRegionType::Usable);
+        // 将每个区域映射到其地址范围
+        let addr_ranges = usable_regions
+            .map(|r| r.range.start_addr()..r.range.end_addr());
+        // 转化为一个帧起始地址的迭代器
+        let frame_addresses = addr_ranges.flat_map(|r| r.step_by(4096));
+        // 从起始地址创建 `PhysFrame`  类型 
+        frame_addresses.map(|addr| PhysFrame::containing_address(PhysAddr::new(addr)))
+    }
+}
+
+unsafe impl FrameAllocator<Size4KiB> for BootInfoFrameAllocator {
+    fn allocate_frame(&mut self) -> Option<PhysFrame> {
+        let frame = self.usable_frames().nth(self.next);
+        self.next += 1;
+        frame
     }
 }
 
