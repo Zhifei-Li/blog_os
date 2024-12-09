@@ -13,18 +13,16 @@ pub extern "C" fn _start() -> ! {
 
     blog_os::init();
 
-    // fn stack_overflow() {
-    //     stack_overflow(); 
-    // }
-
-    // stack_overflow();
-
     // as before
     #[cfg(test)]
     test_main();
 
     println!("It did not crash!");
-    loop {}
+    loop {
+        use blog_os::print;
+        print!("-");  
+        for _ in 0..10000 {}    
+    }
 }
 /// This function is called on panic.
 #[cfg(not(test))]
