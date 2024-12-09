@@ -10,11 +10,23 @@ mod serial;
 
 use core::panic::PanicInfo;
 
+#[cfg(not(test))] 
 #[panic_handler]
 fn panic(info: &PanicInfo) -> ! {
     println!("{}", info);
     loop {}
 }
+
+// our panic handler in test mode
+#[cfg(test)]
+#[panic_handler]
+fn panic(info: &PanicInfo) -> ! {
+    serial_println!("[failed]\n");
+    serial_println!("Error: {}\n", info);
+    exit_qemu(QemuExitCode::Failed);
+    loop {}
+}
+
 #[no_mangle]
 pub extern "C" fn _start() -> ! {
     println!("Hello World{}", "!");
@@ -33,7 +45,6 @@ fn test_runner(tests: &[&dyn Fn()]) {
     for test in tests {
         test();
     }
-    /// new
     exit_qemu(QemuExitCode::Success);
 }
 #[test_case]
