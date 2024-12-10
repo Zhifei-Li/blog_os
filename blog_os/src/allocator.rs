@@ -9,11 +9,13 @@ use x86_64::{
 use linked_list::LinkedListAllocator;
 use linked_list_allocator::LockedHeap;
 use bump::BumpAllocator;
+use fixed_size_block::FixedSizeBlockAllocator;
 
 
 #[global_allocator]
 // static ALLOCATOR: Locked<BumpAllocator> = Locked::new(BumpAllocator::new());
-static ALLOCATOR: Locked<LinkedListAllocator> = Locked::new(LinkedListAllocator::new());
+// static ALLOCATOR: Locked<LinkedListAllocator> = Locked::new(LinkedListAllocator::new());
+static ALLOCATOR: Locked<FixedSizeBlockAllocator> = Locked::new(FixedSizeBlockAllocator::new());
 
 pub struct Dummy;
 pub mod bump;
