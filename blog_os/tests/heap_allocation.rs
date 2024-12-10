@@ -12,6 +12,16 @@ use alloc::boxed::Box;
 use alloc::vec::Vec;
 use blog_os::allocator::HEAP_SIZE;
 
+
+#[test_case]
+fn many_boxes_long_lived() {
+    let long_lived = Box::new(1); // new
+    for i in 0..HEAP_SIZE {
+        let x = Box::new(i);
+        assert_eq!(*x, i);
+    }
+    assert_eq!(*long_lived, 1); // new
+}
 #[test_case]
 fn many_boxes() {
     for i in 0..HEAP_SIZE {

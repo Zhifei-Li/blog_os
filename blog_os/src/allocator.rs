@@ -6,13 +6,19 @@ use x86_64::{
     },
     VirtAddr,
 };
+use linked_list::LinkedListAllocator;
 use linked_list_allocator::LockedHeap;
 use bump::BumpAllocator;
+
+
 #[global_allocator]
-static ALLOCATOR: Locked<BumpAllocator> = Locked::new(BumpAllocator::new());
+// static ALLOCATOR: Locked<BumpAllocator> = Locked::new(BumpAllocator::new());
+static ALLOCATOR: Locked<LinkedListAllocator> = Locked::new(LinkedListAllocator::new());
 
 pub struct Dummy;
 pub mod bump;
+pub mod linked_list;
+pub mod fixed_size_block;
 
 // #[global_allocator]
 // static ALLOCATOR: Dummy = Dummy;
